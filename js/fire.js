@@ -1,38 +1,51 @@
-let fireWidth = 0;
-let fireHeight = 0;
-const maxNum = 1500;  //stop the intervals when this number is reached
-//let intFire = null;
+const maxNum = 500;  //stop the intervals when this number is reached
 
-/*for demonstration purposes, we'll just create two nearly identical functions
-that iterate an integer by 1. In practice, you could put in whatever code you
-need (such as moving a shape) into these functions .*/
-
-const intervalFire = document.getElementById("fire");
-
-function incrementIntervalFire(){
-      intervalFire.style.width = fireWidth.toString() + "px";
-      intervalFire.style.height = fireHeight.toString() + "px";
-      intervalFire.style.top = parseFloat(currentDragon.imageElement.style.top) - parseFloat(intervalFire.style.height) * 190/233 + 165 + "px"; 
-      fireWidth+=4;     
-      fireHeight+=1;
-      if (fireWidth > maxNum){
-            clearInterval(fireID);
-            //console.log("Interval1 maxNum reached. num1=" + fireWidth.toString());
+class Fire {
+      constructor(dragon) {
+            this.dragon = dragon;
+            this.intervalFire = document.getElementById("fire");
+            console.log("create fire", this.intervalFire)
+            this.fireWidth = 0;
+            this.fireHeight = 0;
+            this.intervalId = null ; // IntervalId returned by setInterval
       }
-}
-/* Running the two functions simultaneously at different intervals.
 
-The setInterval is one of the few JavaScript functions that can run asynchronously.
-This means that it can run at the same time as other code, and it can run
-at different intervals than other code. This makes it a very handy function.
+      incrementIntervalFire() {
+            this.fireWidth += 4;
+            this.fireHeight += 1;
 
-Run the code and you'll see that the two intervals run at different speeds simultaneously
-by displaying the counters and changing the width of the p elements to match the counters.      
-*/
+            this.intervalFire.style.width = this.fireWidth.toString() + "px";
+            this.intervalFire.style.height = this.fireHeight.toString() + "px";
+            this.intervalFire.style.top = parseFloat(this.dragon.imageElement.style.top) - parseFloat(this.intervalFire.style.height) * 190 / 233 + 165 + "px";
 
-function resetFire(){
-      var fireImage = document.getElementById("fire");
-      fireImage.style.display = "none";
-      fireWidth = 0;
-      fireHeight = 0;
+            if (this.fireWidth > maxNum) {
+                  // stop interval timer, stop animation
+                  clearInterval(this.intervalId);
+                  //console.log("Interval1 maxNum reached. num1=" + fireWidth.toString());
+            }
+      }
+
+      resetFire() {
+            // stop interval
+            clearInterval(this.intervalId);
+            // hide fire
+            this.fireWidth = 0;
+            this.fireHeight = 0;
+            this.intervalFire.style.display = "none";
+      }
+
+      show(intervalTime) {
+            this.intervalFire.style.display = "block";
+            this.intervalId = setInterval(this.incrementIntervalFire.bind(this), 5);   // increase fire size to increase it
+            // start a timeout timer to reset fire
+            setTimeout(this.resetFire.bind(this), intervalTime);
+      }
+
+      moveUp() {
+            this.intervalFire.style.top = this.dragon.imageElement.style.top; 
+      }
+
+      moveDown() {
+            this.intervalFire.style.top = this.dragon.imageElement.style.top; 
+      }
 }

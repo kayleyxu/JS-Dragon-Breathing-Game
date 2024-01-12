@@ -87,8 +87,4 @@ class Bat {
             }
         }
     }
-
 }
-
-// Start generating bats
-new Bat();

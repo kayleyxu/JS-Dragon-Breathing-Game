@@ -4,16 +4,16 @@
   <title>Game</title>
   <script src="js/detect.js"></script>
   <script src="js/dragon.js"></script>
-  <script src="js/breathingEvents.js" defer></script>
-  <script src="js/fire.js" defer></script>
+  <script src="js/fire.js"></script>
   <script src="js/drinkWater.js"></script>
-  <script src="js/bat.js" defer></script>
-
+  <script src="js/bat.js"></script>
+  <script src="js/breathingEvents.js" defer></script>
+  <script src="js/game.js" defer></script>
 </head>
 
 <body onkeypress="getWhichKeyPressed(event);">
 	<div style="width:400px; margin:50px auto;">
-		<input type="button" style="padding:20px 50px; font-size:20px; cursor:pointer"id="buttonId" onClick="clicked()" value="Start breathing algorithm !!!">
+		<input type="button" style="padding:20px 50px; font-size:20px; cursor:pointer"id="buttonId" onClick="startGame()" value="Start breathing algorithm !!!">
 		<!-- 		
 		<div id="display-parameters" style="margin-top:50px; font-size:25px; color:#ffffff;background:#000;padding:20px; width:300px;text-align:center;"></div>
 		<div id="display-running" style="margin-top:50px; font-size:25px; color:#ffffff;background:#000;padding:20px; width:300px;text-align:center;"></div>
