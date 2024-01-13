@@ -12,6 +12,10 @@ class Game {
         // create dragon object
         this.dragon = new Dragon(0, 0, 0, "currentDragon");
 
+
+        // get the buckt image
+        this.bucketImageElement = document.getElementById("bucket");
+
         // create fire object, let fire know about dragon
         this.fire = new Fire(this.dragon);
 
@@ -63,9 +67,9 @@ class Game {
     }
 
     createBat() {
-        console.log("Game: createBat")
         let bat = new Bat();
         this.flyingBats.push(bat)
+        console.log("Game: createBat", bat.imageElement.id, Bat.BatCounter);
 
         // start new timout to create next bat
         /*
@@ -98,9 +102,19 @@ class Game {
 
         // update flying bats position
         // if any bats collide with fire, move it to burning bats list
-        for (let i=0; i < this.flyingBats.length; i++) {
+        for (let i=this.flyingBats.length - 1; i >= 0; i--) {
             // move each bat
-            this.flyingBats[i].move();
+            let bat = this.flyingBats[i];
+
+            let batVisible = bat.move();
+            if (!batVisible) {
+                console.log("bat not visible ", bat.id, bat.imageElement)
+                // remove this bat from the flying ones
+                this.flyingBats.splice(i, 1);
+
+                // remove image from document
+                bat.imageElement.remove()
+            }
         }
 
         // check for bat collision
@@ -123,7 +137,7 @@ class Game {
             parseInt(imageElement1.style.top) <= parseInt(imageElement2.style.top) + parseInt(imageElement2.style.height) &&
             parseInt(imageElement1.style.top) + parseInt(imageElement1.style.height) >= parseInt(imageElement2.style.top)
         ) {
-            console.log("bat collide with fire");
+            // console.log("image overlap");
             return true;
         }
         else {
@@ -135,34 +149,6 @@ class Game {
 
     // return true if bat collides with fire
     checkFireAndBatCollision(fire, bat) {
-        /*
-        console.log("Fire top: ", fire.intervalFire.style.top);
-        console.log("Fire Left:", fire.intervalFire.style.left); 
-        console.log("Fire width: ", fire.fireWidth);
-        console.log("Fire height: ", fire.fireHeight);
-
-        console.log("which bat", bat.element.id);
-        console.log("Bat Left:", bat.element.style.left);
-        console.log("bat top: ", bat.element.style.top);
-        console.log("bat width: ", bat.element.style.width);
-        console.log("bat height: ", bat.element.style.height);
-        */
-        /*
-        if (
-            parseInt(bat.imageElement.style.left) <= parseInt(fire.imageElement.style.left) + parseInt(fire.fireWidth) &&
-            parseInt(bat.imageElement.style.left) + parseInt(bat.imageElement.style.width) >= parseInt(fire.imageElement.style.left) &&
-            parseInt(bat.imageElement.style.top) <= parseInt(fire.imageElement.style.top) + parseInt(fire.fireHeight) &&
-            parseInt(bat.imageElement.style.top) + parseInt(bat.imageElement.style.height) >= parseInt(fire.imageElement.style.top)
-        ) {
-            console.log("bat collide with fire");
-            return true;
-        }
-        else {
-            // console.log("bat NOT collide with fire");
-            return false;
-        } 
-        */
-
         return this.checkImageOverlap(bat.imageElement, fire.imageElement);
     }
 
@@ -172,12 +158,15 @@ class Game {
 
             if (this.fire.isVisible() && this.checkFireAndBatCollision(this.fire, bat)) {
                 bat.imageElement.style.display = "none";
-                console.log("bat dead, style.display: ", bat.imageElement.style.display);
+                console.log("bat burnt by fire!!!", bat.id);
 
                 // remove this bat from the flying ones
                 this.flyingBats.splice(i, 1);
                 // add this bat to the burning ones
                 this.burningBats.push(bat);
+
+                // remove image from document
+                bat.imageElement.remove()
             }
         }
 
@@ -187,12 +176,33 @@ class Game {
 
             if (this.checkImageOverlap(bat.imageElement, this.dragon.imageElement)) {
                 bat.imageElement.style.display = "none";
-                console.log("bat collide with dragon!!!!!!!, style.display: ", bat.imageElement.style.display);
+                console.log("bat collide with dragon!!!!!!!", bat.id);
 
                 // remove this bat from the flying ones
                 this.flyingBats.splice(i, 1);
                 // add this bat to the burning ones
                 this.burningBats.push(bat);
+
+                // remove image from document
+                bat.imageElement.remove()
+            }
+        }
+
+        // check collision with bucket
+        for (let i = this.flyingBats.length - 1; i >= 0; i--) {
+            let bat = this.flyingBats[i];
+
+            if (this.checkImageOverlap(bat.imageElement, this.bucketImageElement)) {
+                bat.imageElement.style.display = "none";
+                console.log("bat collide with bucket !!!!!!!", bat.id)
+
+                // remove this bat from the flying ones
+                this.flyingBats.splice(i, 1);
+                // add this bat to the burning ones
+                this.burningBats.push(bat);
+
+                // remove image from document
+                bat.imageElement.remove()
             }
         }
     }
