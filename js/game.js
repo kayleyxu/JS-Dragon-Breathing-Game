@@ -12,7 +12,6 @@ class Game {
         // create dragon object
         this.dragon = new Dragon(0, 0, 0, "currentDragon");
 
-
         // get the buckt image
         this.bucketImageElement = document.getElementById("bucket");
 
@@ -25,8 +24,10 @@ class Game {
         // array of bats, burning ones after collide with dragon fire
         this.burningBats = new Array();
 
+        // indicate if audio context has been enabled
+        this.audioStarted = false;
+
         // timer for creating new bats, reduce this timer as game speeds up
-        this.batSpawnTimeout = 5000;
         this.batSpawnTimeoutSpeedUp = 1000;
         this.batSpawnTimeoutMin = 1000;
 
@@ -34,32 +35,41 @@ class Game {
         this.animationId = 0;
 
         // use this variable to stop the animation
-        this.gameStopped = true;
+        this.gameRunning = false;
 
         // timeout ID for creating bats
         this.timeoutId = 0;
     }
 
+    initGame() {
+        // timer for creating new bats, reduce this timer as game speeds up
+        this.batSpawnTimeout = 5000;
+
+        if (!this.audioStarted) {
+            // start breath detection
+            // Create audioContext
+            window.AudioContext = window.AudioContext ||
+                window.webkitAudioContext ||
+                window.mozAudioContext ||
+                window.oAudioContext ||
+                window.msAudioContext;
+
+            audioContext = new AudioContext();
+            audioContext.resume();
+            breathingAlgorithm.run({ 'runjQuery': true });
+
+            this.audioStarted = true;
+        }
+    }
+
     // start the game
     start() {
         console.log("Game: start")
-        this.gameStopped = false;
+        this.initGame()
 
-        // start breath detection
-        //Create audioContext
-        window.AudioContext = window.AudioContext ||
-            window.webkitAudioContext ||
-            window.mozAudioContext ||
-            window.oAudioContext ||
-            window.msAudioContext;
-
-        audioContext = new AudioContext();
-        audioContext.resume();
-        breathingAlgorithm.run({ 'runjQuery': true });
-
+        this.gameRunning = true;
         // change button to indicate game is running
-        this.button.value = "Having fun!"
-
+        this.button.value = "Stop breathing game";
 
         // start creating bats
         this.createBat()
@@ -90,12 +100,24 @@ class Game {
     // stop the game
     stop() {
         console.log("Game: stop")
-        // change button to indicate game is stopped
+        this.gameRunning = false;
 
-        // stop animation
-        this.gameStopped = true;
+        // cancel animation
         cancelAnimationFrame(this.animationId);
         this.animationId = 0;
+
+        // stop bat spawn timer
+        clearTimeout(this.timeoutId);
+
+        // remove all bats
+        for (let i=this.flyingBats.length - 1; i >= 0; i--) {
+            let bat = this.flyingBats[i];
+            bat.imageElement.remove();
+            this.flyingBats.splice(i, 1);
+        }
+
+        // change button to indicate game is stopped
+        this.button.value = "Start breathing game";
     }
 
 
@@ -130,7 +152,7 @@ class Game {
         // if bats is shrinked to size 0, remove it from the burning bats list
 
         // request a new animation
-        if (!this.gameStopped) {
+        if (this.gameRunning) {
             // game not stopped, keep animating
             this.animationId = requestAnimationFrame(this.animate.bind(this));
         }
@@ -236,11 +258,14 @@ class Game {
 }
 
 function startGame() {
-    console.log("clicked, start game")
-
-    // start the game
-    currentGame.start();
-
+    if (currentGame.gameRunning) {
+        // stop the game
+        currentGame.stop();
+    }
+    else {
+        // start the game
+        currentGame.start();
+    }
 }
 
 function getWhichKeyPressed() {
