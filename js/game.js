@@ -27,6 +27,8 @@ class Game {
 
         // timer for creating new bats, reduce this timer as game speeds up
         this.batSpawnTimeout = 5000;
+        this.batSpawnTimeoutSpeedUp = 1000;
+        this.batSpawnTimeoutMin = 1000;
 
         // save the requested animation ID so we can cancel it to stop the game
         this.animationId = 0;
@@ -71,12 +73,16 @@ class Game {
         this.flyingBats.push(bat)
         console.log("Game: createBat", bat.imageElement.id, Bat.BatCounter);
 
-        // start new timout to create next bat
-        /*
-        this.batSpawnTimeout -= spawnRateIncrement;     // Decrease spawn rate
-        this.batSpawnTimeout = Math.max(this.batSpawnTimeout, minSpawnRate); // Cap spawn rate
-        */
-
+        if (Bat.BatCounter % 10 == 0) {
+            // reduce bat spawn timeout to make it faster after spawning every 10 bats
+            this.batSpawnTimeout -= this.batSpawnTimeoutSpeedUp;
+            console.log("reduce bat creation timeout to", this.batSpawnTimeout);
+            if (this.batSpawnTimeout < this.batSpawnTimeoutMin) {
+                // console.log("Fix bat creation timeout to", self.batSpawnTimeout);
+                // use a minimum Timeout
+                this.batSpawnTimeout = this.batSpawnTimeoutMin;
+            }
+        }
         // start a new timout to create next bat
         this.timeoutId = setTimeout(this.createBat.bind(this), this.batSpawnTimeout);
     }
@@ -206,7 +212,6 @@ class Game {
             }
         }
     }
-
 
     inhaleReset() {
         console.log("Game inhale reset");
