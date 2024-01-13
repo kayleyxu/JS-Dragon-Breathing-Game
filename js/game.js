@@ -1,9 +1,7 @@
 class Game {
-    static BatCounter = 0;
     constructor() {
         console.log("Game: constructor")
         this.batCounter = 0;
-        Bat.BatCounter += 1;
 
         // starting the game button 
         this.button = document.getElementById("buttonId");
@@ -42,6 +40,8 @@ class Game {
     }
 
     initGame() {
+        this.batCounter = 0;
+
         // timer for creating new bats, reduce this timer as game speeds up
         this.batSpawnTimeout = 5000;
 
@@ -70,6 +70,7 @@ class Game {
         this.gameRunning = true;
         // change button to indicate game is running
         this.button.value = "Stop breathing game";
+        this.button.style.backgroundColor = "red";
 
         // start creating bats
         this.createBat()
@@ -80,10 +81,12 @@ class Game {
 
     createBat() {
         let bat = new Bat();
-        this.flyingBats.push(bat)
-        console.log("Game: createBat", bat.imageElement.id, Bat.BatCounter);
+        this.batCounter += 1;
 
-        if (Bat.BatCounter % 10 == 0) {
+        this.flyingBats.push(bat)
+        console.log("Game: createBat", bat.imageElement.id, this.batCounter);
+
+        if (this.batCounter % 10 == 0) {
             // reduce bat spawn timeout to make it faster after spawning every 10 bats
             this.batSpawnTimeout -= this.batSpawnTimeoutSpeedUp;
             console.log("reduce bat creation timeout to", this.batSpawnTimeout);
@@ -118,6 +121,7 @@ class Game {
 
         // change button to indicate game is stopped
         this.button.value = "Start breathing game";
+        this.button.style.backgroundColor = "green";
     }
 
 
