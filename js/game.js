@@ -60,6 +60,9 @@ class Game {
 
             this.audioStarted = true;
         }
+
+        // set the dragon to inhale
+        this.dragon.inhaleReset();
     }
 
     // start the game
@@ -118,6 +121,10 @@ class Game {
             bat.imageElement.remove();
             this.flyingBats.splice(i, 1);
         }
+
+        // set the dragon to inhale
+        this.dragon.inhaleReset();
+        this.fire.resetFire();
 
         // change button to indicate game is stopped
         this.button.value = "Start breathing game";
