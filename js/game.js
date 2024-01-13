@@ -23,11 +23,21 @@ class Game {
 
         // timer for creating new bats, reduce this timer as game speeds up
         this.batSpawnTimeout = 5000;
+
+        // save the requested animation ID so we can cancel it to stop the game
+        this.animationId = 0;
+
+        // use this variable to stop the animation
+        this.gameStopped = true;
+
+        // timeout ID for creating bats
+        this.timeoutId = 0;
     }
 
     // start the game
     start() {
         console.log("Game: start")
+        this.gameStopped = false;
 
         // start breath detection
         //Create audioContext
@@ -44,9 +54,28 @@ class Game {
         // change button to indicate game is running
         this.button.value = "Having fun!"
 
+
+        // start creating bats
+        this.createBat()
+
         // request animation
+        this.animate();
     }
 
+    createBat() {
+        console.log("Game: createBat")
+        let bat = new Bat();
+        this.flyingBats.push(bat)
+
+        // start new timout to create next bat
+        /*
+        this.batSpawnTimeout -= spawnRateIncrement;     // Decrease spawn rate
+        this.batSpawnTimeout = Math.max(this.batSpawnTimeout, minSpawnRate); // Cap spawn rate
+        */
+
+        // start a new timout to create next bat
+        this.timeoutId = setTimeout(this.createBat.bind(this), this.batSpawnTimeout);
+    }
 
     // stop the game
     stop() {
@@ -54,6 +83,9 @@ class Game {
         // change button to indicate game is stopped
 
         // stop animation
+        this.gameStopped = true;
+        cancelAnimationFrame(this.animationId);
+        this.animationId = 0;
     }
 
 
@@ -63,16 +95,65 @@ class Game {
         // update fire size
         //      if breathing out, increase firesize
         //      if breath in, change firezie to 0
+
         // update flying bats position
         // if any bats collide with fire, move it to burning bats list
+        for (let i=0; i < this.flyingBats.length; i++) {
+            // move each bat
+            this.flyingBats[i].move();
+        }
 
+        // check for bat collision
+        this.checkForCollision();
 
         // update burning bats size, shrink them
         // if bats is shrinked to size 0, remove it from the burning bats list
 
-        // create new bats if time passed specified interval
-        // add new bats to flying bats list
+        // request a new animation
+        if (!this.gameStopped) {
+            // game not stopped, keep animating
+            this.animationId = requestAnimationFrame(this.animate.bind(this));
+        }
+    }
 
+    // return true if bat collides with fire
+    checkFireAndBatCollision(fire, bat) {
+        /*
+        console.log("Fire top: ", fire.intervalFire.style.top);
+        console.log("Fire Left:", fire.intervalFire.style.left); 
+        console.log("Fire width: ", fire.fireWidth);
+        console.log("Fire height: ", fire.fireHeight);
+
+        console.log("which bat", bat.element.id);
+        console.log("Bat Left:", bat.element.style.left);
+        console.log("bat top: ", bat.element.style.top);
+        console.log("bat width: ", bat.element.style.width);
+        console.log("bat height: ", bat.element.style.height);
+        */
+
+        if (
+            parseInt(bat.element.style.left) <= parseInt(fire.intervalFire.style.left) + parseInt(fire.fireWidth) &&
+            parseInt(bat.element.style.left) + parseInt(bat.element.style.width) >= parseInt(fire.intervalFire.style.left) &&
+            parseInt(bat.element.style.top) <= parseInt(fire.intervalFire.style.top) + parseInt(fire.fireHeight) &&
+            parseInt(bat.element.style.top) + parseInt(bat.element.style.height) >= parseInt(fire.intervalFire.style.top)
+        ) {
+            console.log("bat collide with fire");
+            return true;
+        }
+        else {
+            // console.log("bat NOT collide with fire");
+            return false;
+        }
+    }
+
+    checkForCollision() {
+        for (let i = 0; i < this.flyingBats.length; i++) {
+            let bat = this.flyingBats[i];
+            if (this.checkFireAndBatCollision(this.fire, bat)) {
+                bat.element.style.display = "none";
+                console.log("bat dead, style.display: ", bat.element.style.display);
+            }
+        }
     }
 
 
@@ -103,6 +184,7 @@ function startGame() {
 
     // start the game
     currentGame.start()
+
 }
 
 function getWhichKeyPressed() {

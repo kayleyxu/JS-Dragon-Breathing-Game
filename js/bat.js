@@ -1,68 +1,49 @@
-let bats = [];
-
 class Bat {
-    static BatCounter = 0;
+    static BatCounter = 0;      // how many bats have been created
     constructor() {
-        this.bat = document.createElement('img'); //reminder to change this
-        this.bat.src = 'images/bat.png'; // Replace with the correct path to your bat image
-        this.bat.classList.add('bat');
-
-        this.bat.id = Bat.BatCounter;
+        this.element = document.createElement('img'); //reminder to change this
+        this.element.src = 'images/bat.png'; // Replace with the correct path to your bat image
+        this.element.classList.add('bat');
+        this.element.id = Bat.BatCounter;
         Bat.BatCounter += 1;
-        document.body.appendChild(this.bat);
-        bats.push(this);
+
+        document.body.appendChild(this.element);
         this.initPosition();
-        this.moveBat(0); // Start bat movement with count 0
-        this.checkForCollision();
     }
 
     initPosition() {
-        this.bat.style.position = 'absolute';
-        this.bat.style.left = '1400px'; // Start from the right side of the screen
-        this.bat.style.top = `${Math.random() * 800}px`;
-        this.bat.style.height = '100px';
-        this.bat.style.width = '100px';
-        this.bat.style.display = 'block';
+        this.element.style.position = 'absolute';
+        this.element.style.left = '1400px'; // Start from the right side of the screen
+        this.element.style.top = `${Math.random() * 800}px`;
+        this.element.style.height = '100px';
+        this.element.style.width = '100px';
+        this.element.style.display = 'block';
     }
 
-    moveBat(batCount) {
+    // move the bat at the current speed
+    // remove 
+    move() {
         const baseSpeed = 1; // Initial base speed
         const speedIncrement = 0.1; // Speed increment
         const minSpawnRate = 5000; // Minimum spawn rate in milliseconds
         const spawnRateIncrement = 1000; // Spawn rate increment
 
         let currentSpeed = baseSpeed;
-        let currentSpawnRate = minSpawnRate;
+        let batLeft = parseFloat(this.element.style.left) || window.innerWidth;
 
-        function animate(bat) {
-            let batLeft = parseFloat(bat.style.left) || window.innerWidth;
+        batLeft -= currentSpeed 
+        this.element.style.left = `${batLeft}px`;
 
-            bat.style.left = `${batLeft - currentSpeed}px`;
-
-            if (batLeft < -bat.width) { //when it goes off the screen
-                bat.remove();
-                batCount++;
-
-                if (batCount % 10 === 0) {
-                    currentSpeed += speedIncrement; // increase speed for every 10 bats
-                }
-            } else {
-                requestAnimationFrame(() => animate(bat));
-            }
+        if (batLeft < - this.element.width) { //when it goes off the screen
+            // bat is invisible now
+            // remove the image from the document
+            this.element.remove()
+            return false;
         }
 
-        animate(this.bat);
-
-        setTimeout(() => {
-            currentSpawnRate -= spawnRateIncrement; // Decrease spawn rate
-            currentSpawnRate = Math.max(currentSpawnRate, minSpawnRate); // Cap spawn rate
-
-            if (document.contains(this.bat)) {
-                new Bat(); // Spawn the next bat
-            }
-        }, currentSpawnRate); // Adjust spawn rate after each bat
+        return true;
     }
-
+/*
     checkForCollision() {
         for (let i = 0; i < bats.length; i++) {
             console.log("which bat", i);
@@ -87,4 +68,5 @@ class Bat {
             }
         }
     }
+    */
 }
