@@ -14,6 +14,7 @@ class Dragon {
         this.imageElement.style.left = "50px";
         this.imageElement.style.height = "400px";
         this.imageElement.style.top = "360px";
+        this.imageElement.style.width = "357px";
     }
 
     exhaleReset(){
@@ -21,6 +22,7 @@ class Dragon {
         this.imageElement.style.left = "50px";
         this.imageElement.style.height = "400px";
         this.imageElement.style.top = "360px";
+        this.imageElement.style.width = "399px";
     }
 
     moveUp() {

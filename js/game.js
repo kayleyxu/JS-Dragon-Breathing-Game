@@ -90,7 +90,7 @@ class Game {
 
 
     animate() {
-        console.log("Game: animate")
+        // console.log("Game: animate")
         // update dragon state, breathing in, breathing out
         // update fire size
         //      if breathing out, increase firesize
@@ -116,6 +116,23 @@ class Game {
         }
     }
 
+    checkImageOverlap(imageElement1, imageElement2) {
+        if (
+            parseInt(imageElement1.style.left) <= parseInt(imageElement2.style.left) + parseInt(imageElement2.style.width) &&
+            parseInt(imageElement1.style.left) + parseInt(imageElement1.style.width) >= parseInt(imageElement2.style.left) &&
+            parseInt(imageElement1.style.top) <= parseInt(imageElement2.style.top) + parseInt(imageElement2.style.height) &&
+            parseInt(imageElement1.style.top) + parseInt(imageElement1.style.height) >= parseInt(imageElement2.style.top)
+        ) {
+            console.log("bat collide with fire");
+            return true;
+        }
+        else {
+            // console.log("bat NOT collide with fire");
+            return false;
+        }
+    }
+
+
     // return true if bat collides with fire
     checkFireAndBatCollision(fire, bat) {
         /*
@@ -130,7 +147,7 @@ class Game {
         console.log("bat width: ", bat.element.style.width);
         console.log("bat height: ", bat.element.style.height);
         */
-
+        /*
         if (
             parseInt(bat.imageElement.style.left) <= parseInt(fire.imageElement.style.left) + parseInt(fire.fireWidth) &&
             parseInt(bat.imageElement.style.left) + parseInt(bat.imageElement.style.width) >= parseInt(fire.imageElement.style.left) &&
@@ -143,15 +160,39 @@ class Game {
         else {
             // console.log("bat NOT collide with fire");
             return false;
-        }
+        } 
+        */
+
+        return this.checkImageOverlap(bat.imageElement, fire.imageElement);
     }
 
     checkForCollision() {
-        for (let i = 0; i < this.flyingBats.length; i++) {
+        for (let i = this.flyingBats.length - 1; i >= 0; i--) {
             let bat = this.flyingBats[i];
-            if (this.checkFireAndBatCollision(this.fire, bat)) {
+
+            if (this.fire.isVisible() && this.checkFireAndBatCollision(this.fire, bat)) {
                 bat.imageElement.style.display = "none";
                 console.log("bat dead, style.display: ", bat.imageElement.style.display);
+
+                // remove this bat from the flying ones
+                this.flyingBats.splice(i, 1);
+                // add this bat to the burning ones
+                this.burningBats.push(bat);
+            }
+        }
+
+        // check collision with dragaon
+        for (let i = this.flyingBats.length - 1; i >= 0; i--) {
+            let bat = this.flyingBats[i];
+
+            if (this.checkImageOverlap(bat.imageElement, this.dragon.imageElement)) {
+                bat.imageElement.style.display = "none";
+                console.log("bat collide with dragon!!!!!!!, style.display: ", bat.imageElement.style.display);
+
+                // remove this bat from the flying ones
+                this.flyingBats.splice(i, 1);
+                // add this bat to the burning ones
+                this.burningBats.push(bat);
             }
         }
     }
@@ -183,7 +224,7 @@ function startGame() {
     console.log("clicked, start game")
 
     // start the game
-    currentGame.start()
+    currentGame.start();
 
 }
 

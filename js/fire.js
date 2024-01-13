@@ -41,6 +41,10 @@ class Fire {
             setTimeout(this.resetFire.bind(this), intervalTime);
       }
 
+      isVisible() {
+            return this.imageElement.style.display != "none";
+      }
+
       moveUp() {
             this.imageElement.style.top = this.dragon.imageElement.style.top; 
       }
