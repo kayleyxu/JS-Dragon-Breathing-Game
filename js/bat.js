@@ -15,7 +15,7 @@ class Bat {
     initPosition() {
         this.imageElement.style.position = 'absolute';
         this.imageElement.style.left = '1400px'; // Start from the right side of the screen
-        this.imageElement.style.top = `${Math.random() * 800}px`;
+        this.imageElement.style.top = `${Math.random() * 800 + 100}px`;
         this.imageElement.style.height = '100px';
         this.imageElement.style.width = '100px';
         this.imageElement.style.display = 'block';
