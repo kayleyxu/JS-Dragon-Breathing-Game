@@ -132,10 +132,10 @@ class Game {
         */
 
         if (
-            parseInt(bat.element.style.left) <= parseInt(fire.intervalFire.style.left) + parseInt(fire.fireWidth) &&
-            parseInt(bat.element.style.left) + parseInt(bat.element.style.width) >= parseInt(fire.intervalFire.style.left) &&
-            parseInt(bat.element.style.top) <= parseInt(fire.intervalFire.style.top) + parseInt(fire.fireHeight) &&
-            parseInt(bat.element.style.top) + parseInt(bat.element.style.height) >= parseInt(fire.intervalFire.style.top)
+            parseInt(bat.imageElement.style.left) <= parseInt(fire.imageElement.style.left) + parseInt(fire.fireWidth) &&
+            parseInt(bat.imageElement.style.left) + parseInt(bat.imageElement.style.width) >= parseInt(fire.imageElement.style.left) &&
+            parseInt(bat.imageElement.style.top) <= parseInt(fire.imageElement.style.top) + parseInt(fire.fireHeight) &&
+            parseInt(bat.imageElement.style.top) + parseInt(bat.imageElement.style.height) >= parseInt(fire.imageElement.style.top)
         ) {
             console.log("bat collide with fire");
             return true;
@@ -150,8 +150,8 @@ class Game {
         for (let i = 0; i < this.flyingBats.length; i++) {
             let bat = this.flyingBats[i];
             if (this.checkFireAndBatCollision(this.fire, bat)) {
-                bat.element.style.display = "none";
-                console.log("bat dead, style.display: ", bat.element.style.display);
+                bat.imageElement.style.display = "none";
+                console.log("bat dead, style.display: ", bat.imageElement.style.display);
             }
         }
     }

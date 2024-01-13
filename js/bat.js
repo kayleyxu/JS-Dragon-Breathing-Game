@@ -1,23 +1,23 @@
 class Bat {
     static BatCounter = 0;      // how many bats have been created
     constructor() {
-        this.element = document.createElement('img'); //reminder to change this
-        this.element.src = 'images/bat.png'; // Replace with the correct path to your bat image
-        this.element.classList.add('bat');
-        this.element.id = Bat.BatCounter;
+        this.imageElement = document.createElement('img'); //reminder to change this
+        this.imageElement.src = 'images/bat.png'; // Replace with the correct path to your bat image
+        this.imageElement.classList.add('bat');
+        this.imageElement.id = Bat.BatCounter;
         Bat.BatCounter += 1;
 
-        document.body.appendChild(this.element);
+        document.body.appendChild(this.imageElement);
         this.initPosition();
     }
 
     initPosition() {
-        this.element.style.position = 'absolute';
-        this.element.style.left = '1400px'; // Start from the right side of the screen
-        this.element.style.top = `${Math.random() * 800}px`;
-        this.element.style.height = '100px';
-        this.element.style.width = '100px';
-        this.element.style.display = 'block';
+        this.imageElement.style.position = 'absolute';
+        this.imageElement.style.left = '1400px'; // Start from the right side of the screen
+        this.imageElement.style.top = `${Math.random() * 800}px`;
+        this.imageElement.style.height = '100px';
+        this.imageElement.style.width = '100px';
+        this.imageElement.style.display = 'block';
     }
 
     // move the bat at the current speed
@@ -29,15 +29,15 @@ class Bat {
         const spawnRateIncrement = 1000; // Spawn rate increment
 
         let currentSpeed = baseSpeed;
-        let batLeft = parseFloat(this.element.style.left) || window.innerWidth;
+        let batLeft = parseFloat(this.imageElement.style.left) || window.innerWidth;
 
         batLeft -= currentSpeed 
-        this.element.style.left = `${batLeft}px`;
+        this.imageElement.style.left = `${batLeft}px`;
 
-        if (batLeft < - this.element.width) { //when it goes off the screen
+        if (batLeft < - this.imageElement.width) { //when it goes off the screen
             // bat is invisible now
             // remove the image from the document
-            this.element.remove()
+            this.imageElement.remove()
             return false;
         }
 
