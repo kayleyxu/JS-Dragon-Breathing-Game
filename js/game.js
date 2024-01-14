@@ -1,11 +1,10 @@
 class Game {
     constructor() {
-        console.log("Game: constructor")
+        console.log("Game: created")
         this.batCounter = 0;
 
         // starting the game button 
         this.button = document.getElementById("buttonId");
-        console.log("Game: constructor", this.button)
 
         // create dragon object
         this.dragon = new Dragon(0, 0, 0, "currentDragon");
@@ -37,6 +36,12 @@ class Game {
 
         // timeout ID for creating bats
         this.timeoutId = 0;
+
+        // save last inhale time
+        this.inhaleTime = 0;
+
+        // save last exhale time
+        this.exhaleTime = 0;
     }
 
     initGame() {
@@ -87,12 +92,12 @@ class Game {
         this.batCounter += 1;
 
         this.flyingBats.push(bat)
-        console.log("Game: createBat", bat.imageElement.id, this.batCounter);
+        console.log("Create bat %d", bat.imageElement.id);
 
         if (this.batCounter % 10 == 0) {
             // reduce bat spawn timeout to make it faster after spawning every 10 bats
             this.batSpawnTimeout -= this.batSpawnTimeoutSpeedUp;
-            console.log("reduce bat creation timeout to", this.batSpawnTimeout);
+            console.log("Total %d bat created, reduce bat creation timeout to %d", this.batCounter, this.batSpawnTimeout);
             if (this.batSpawnTimeout < this.batSpawnTimeoutMin) {
                 // console.log("Fix bat creation timeout to", self.batSpawnTimeout);
                 // use a minimum Timeout
@@ -124,7 +129,7 @@ class Game {
 
         // set the dragon to inhale
         this.dragon.inhaleReset();
-        this.fire.resetFire();
+        this.fire.stop();
 
         // change button to indicate game is stopped
         this.button.value = "Start breathing game";
@@ -147,7 +152,7 @@ class Game {
 
             let batVisible = bat.move();
             if (!batVisible) {
-                console.log("bat not visible ", bat.id, bat.imageElement)
+                console.log("Bat %d is not visible any more ", bat.id);
                 // remove this bat from the flying ones
                 this.flyingBats.splice(i, 1);
 
@@ -197,7 +202,7 @@ class Game {
 
             if (this.fire.isVisible() && this.checkFireAndBatCollision(this.fire, bat)) {
                 bat.imageElement.style.display = "none";
-                console.log("bat burnt by fire!!!", bat.id);
+                console.log("Bat %d is killed by fire!", bat.id);
 
                 // remove this bat from the flying ones
                 this.flyingBats.splice(i, 1);
@@ -215,7 +220,7 @@ class Game {
 
             if (this.checkImageOverlap(bat.imageElement, this.dragon.imageElement)) {
                 bat.imageElement.style.display = "none";
-                console.log("bat collide with dragon!!!!!!!", bat.id);
+                console.log("Bat %d reached the dragon!!", bat.id);
 
                 // remove this bat from the flying ones
                 this.flyingBats.splice(i, 1);
@@ -233,7 +238,7 @@ class Game {
 
             if (this.checkImageOverlap(bat.imageElement, this.bucketImageElement)) {
                 bat.imageElement.style.display = "none";
-                console.log("bat collide with bucket !!!!!!!", bat.id)
+                console.log("Bat %d collided with bucket!!!", bat.id)
 
                 // remove this bat from the flying ones
                 this.flyingBats.splice(i, 1);
@@ -246,16 +251,34 @@ class Game {
         }
     }
 
-    inhaleReset() {
-        console.log("Game inhale reset");
+    inhaleStart() {
+        console.log("Breathing inhale started");
         this.dragon.inhaleReset();
     }
 
-    exhaleReset(inhaleTime) {
-        console.log("Game exhale reset");
-        this.dragon.exhaleReset();
-        this.fire.show(inhaleTime);
+    inhaleEnd(inhaleTime) {
+        // record inhale time, to show
+        this.inhaleTime = inhaleTime;
+        console.log("Breathing inhale ended, inhaleTime: %d ms", inhaleTime);
     }
+
+    exhaleStart() {
+        console.log("Breathing exhale started");
+        this.dragon.exhaleReset();
+        //this.fire.show(this.inhaleTime);
+        this.fire.start();
+    }
+
+    exhaleEnd(exhaleTime) {
+        // record exhale time
+        this.exhaleTime = exhaleTime;
+        console.log("Breathing exhale ended, exhaleTime: %d ms", exhaleTime);
+        this.fire.stop();
+
+        // dragon goes back to inhale
+        this.dragon.inhaleReset();
+    }
+
 
     upKeyPressed() {
         this.dragon.moveUp();
