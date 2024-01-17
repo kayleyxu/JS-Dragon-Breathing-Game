@@ -1,10 +1,27 @@
 class Game {
+    static DRAGON_MAX_LIVES = 10;
+    static BAT_SPEED_MAX_LEVEL = 10;
+
     constructor() {
         console.log("Game: created")
         this.batCounter = 0;
+        this.totalBatsKilled = 0;
+        this.totalBatsReachedDragon = 0;
+        this.goodBreathCount = 0;
+        this.score = 0;
+        this.totalLivesLeft = Game.DRAGON_MAX_LIVES;
+        this.batSpeedLevel = 1;     // base speed
 
         // starting the game button 
         this.button = document.getElementById("buttonId");
+
+        // stats table
+        this.scoreStats = document.getElementById("score");
+        this.totalLivesLeftStat = document.getElementById("totalLivesLeft");
+        this.lastInhaleTimeStats = document.getElementById("lastInhaleTime");
+        this.lastExhaleTimeStats = document.getElementById("lastExhaleTime");
+        // this.goodBreathCountStats = document.getElementById("goodBreathCount");
+        this.batSpeedLevelStats = document.getElementById("batSpeedLevel");
 
         // create dragon object
         this.dragon = new Dragon(0, 0, 0, "currentDragon");
@@ -42,10 +59,36 @@ class Game {
 
         // save last exhale time
         this.exhaleTime = 0;
+
+        // set the dragon to inhale
+        this.dragon.inhaleReset();
+
+        // timeout ID for stopping the fire
+        this.fireOffTimeoutId = 0;
+    }
+
+    updateStats() {
+        this.lastInhaleTimeStats.innerHTML = this.inhaleTime.toString();
+        this.lastExhaleTimeStats.innerHTML = this.exhaleTime.toString();
+
+        this.score = this.totalBatsKilled * 10;
+        this.scoreStats.innerHTML = this.score.toString();
+        this.totalLivesLeft = Game.DRAGON_MAX_LIVES - this.totalBatsReachedDragon;
+        this.totalLivesLeftStat.innerHTML = this.totalLivesLeft.toString();
+        // this.goodBreathCountStats.innerHTML = this.goodBreathCount.toString();
+        this.batSpeedLevelStats.innerHTML = this.batSpeedLevel.toString();
     }
 
     initGame() {
         this.batCounter = 0;
+        this.totalBatsKilled = 0;
+        this.totalBatsReachedDragon = 0;
+        this.goodBreathCount = 0;
+        this.score = 0;
+        this.totalLivesLeft = Game.DRAGON_MAX_LIVES;
+        this.inhaleTime = 0;
+        this.exhaleTime = 0;
+        this.batSpeedLevel = 1;
 
         // timer for creating new bats, reduce this timer as game speeds up
         this.batSpawnTimeout = 5000;
@@ -66,8 +109,12 @@ class Game {
             this.audioStarted = true;
         }
 
+        this.updateStats();
         // set the dragon to inhale
         this.dragon.inhaleReset();
+
+        // stop fire
+        this.stopFire();
     }
 
     // start the game
@@ -99,17 +146,24 @@ class Game {
             this.batSpawnTimeout -= this.batSpawnTimeoutSpeedUp;
             console.log("Total %d bat created, reduce bat creation timeout to %d", this.batCounter, this.batSpawnTimeout);
             if (this.batSpawnTimeout < this.batSpawnTimeoutMin) {
-                // console.log("Fix bat creation timeout to", self.batSpawnTimeout);
+                // console.log("Fix bat creation timeout to", this.batSpawnTimeout);
                 // use a minimum Timeout
                 this.batSpawnTimeout = this.batSpawnTimeoutMin;
             }
+
+            if (this.batSpeedLevel < Game.BAT_SPEED_MAX_LEVEL) {
+                // bat speed increased one level
+                this.batSpeedLevel += 1;
+                this.speedUpBats();
+            }
         }
+
         // start a new timout to create next bat
         this.timeoutId = setTimeout(this.createBat.bind(this), this.batSpawnTimeout);
     }
 
     // stop the game
-    stop() {
+    stop(message) {
         console.log("Game: stop")
         this.gameRunning = false;
 
@@ -129,10 +183,12 @@ class Game {
 
         // set the dragon to inhale
         this.dragon.inhaleReset();
-        this.fire.stop();
+
+        // stop fire
+        this.stopFire();
 
         // change button to indicate game is stopped
-        this.button.value = "Start breathing game";
+        this.button.value = message; // "Start breathing game";
         this.button.style.backgroundColor = "green";
     }
 
@@ -166,6 +222,14 @@ class Game {
 
         // update burning bats size, shrink them
         // if bats is shrinked to size 0, remove it from the burning bats list
+
+        // update stats table
+        this.updateStats();
+
+        if (this.totalLivesLeft <= 0) {
+            // game over
+            this.stop("Game over, play again!");
+        }
 
         // request a new animation
         if (this.gameRunning) {
@@ -201,8 +265,9 @@ class Game {
             let bat = this.flyingBats[i];
 
             if (this.fire.isVisible() && this.checkFireAndBatCollision(this.fire, bat)) {
+                this.totalBatsKilled += 1;
                 bat.imageElement.style.display = "none";
-                console.log("Bat %d is killed by fire!", bat.id);
+                console.log("Bat %d is killed by fire!, total bats killed: %d", bat.id, this.totalBatsKilled);
 
                 // remove this bat from the flying ones
                 this.flyingBats.splice(i, 1);
@@ -219,8 +284,9 @@ class Game {
             let bat = this.flyingBats[i];
 
             if (this.checkImageOverlap(bat.imageElement, this.dragon.imageElement)) {
+                this.totalBatsReachedDragon += 1;
                 bat.imageElement.style.display = "none";
-                console.log("Bat %d reached the dragon!!", bat.id);
+                console.log("Bat %d reached the dragon, total bats reached dragon: %d!", bat.id, this.totalBatsReachedDragon);
 
                 // remove this bat from the flying ones
                 this.flyingBats.splice(i, 1);
@@ -251,34 +317,80 @@ class Game {
         }
     }
 
+    speedUpBats() {
+        // check collision with dragaon
+        console.log("speed up all bats");
+        for (let i = this.flyingBats.length - 1; i >= 0; i--) {
+            let bat = this.flyingBats[i];
+            bat.speedup();
+        }
+    }
+
     inhaleStart() {
         console.log("Breathing inhale started");
         this.dragon.inhaleReset();
     }
 
     inhaleEnd(inhaleTime) {
+        console.log("Breathing inhale ended, inhaleTime: %d ms", inhaleTime);
         // record inhale time, to show
         this.inhaleTime = inhaleTime;
-        console.log("Breathing inhale ended, inhaleTime: %d ms", inhaleTime);
+        this.updateStats();
     }
 
     exhaleStart() {
         console.log("Breathing exhale started");
         this.dragon.exhaleReset();
-        //this.fire.show(this.inhaleTime);
-        this.fire.start();
+        this.startFire();
     }
 
     exhaleEnd(exhaleTime) {
         // record exhale time
         this.exhaleTime = exhaleTime;
+        this.updateStats();
+
         console.log("Breathing exhale ended, exhaleTime: %d ms", exhaleTime);
-        this.fire.stop();
+        if (this.inhaleTime > this.exhaleTime) {
+            console.log("Great! Inhale (%dms) longer as exhale (%dms)", this.inhaleTime, this.exhaleTime);
+            // give bonus point!
+            this.goodBreathCount += 1;
+        }
 
         // dragon goes back to inhale
         this.dragon.inhaleReset();
+
+        // stop fire right away
+        this.stopFire();
     }
 
+    startFire() {
+        console.log("start fire, will stop it after inhaleTime=%d", this.inhaleTime *2) 
+        this.fire.start();
+
+        // stop the fire after inhale time
+        this.fireOffTimeoutId = setTimeout(this.stopFireTimeout.bind(this), this.inhaleTime * 2);
+    }
+
+    stopFireTimeout()  {
+        console.log("timeout after inhale time, stop fire")
+        this.fire.stop();
+        this.fireOffTimeoutId = 0;  // timeout expired here
+    }
+
+    stopFire() {
+        if (this.fire.isVisible()) {
+            console.log("stop fire at end of exhale")
+            this.fire.stop();
+        }
+        else {
+            console.log("fire is already stopped")
+        }
+
+        if (this.fireOffTimeoutId != 0) {
+            clearTimeout(this.fireOffTimeoutId);
+            this.fireOffTimeoutId = 0;
+        }
+    }
 
     upKeyPressed() {
         this.dragon.moveUp();
@@ -294,7 +406,7 @@ class Game {
 function startGame() {
     if (currentGame.gameRunning) {
         // stop the game
-        currentGame.stop();
+        currentGame.stop("Start breathing game");
     }
     else {
         // start the game
